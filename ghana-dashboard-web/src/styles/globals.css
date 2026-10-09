@@ -1,0 +1,405 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  Runtime surface tokens - flip between light and dark via the .dark class.
+  Semantic utilities (bg-surface, text-ink, border-line, ...) resolve these,
+  so components adapt automatically.
+*/
+:root {
+  --surface: oklch(0.975 0.008 245);
+  --surface-2: oklch(0.995 0.003 245 / 0.82);
+  --surface-3: oklch(0.945 0.012 250);
+  --ink: oklch(0.24 0.04 265);
+  --ink-soft: oklch(0.45 0.035 260);
+  --line: oklch(0.88 0.015 255 / 0.8);
+  --line-strong: oklch(0.78 0.025 255);
+  --ring-c: 0.58 0.15 160;
+  --aurora-a: oklch(0.82 0.13 165 / 0.35);
+  --aurora-b: oklch(0.8 0.12 85 / 0.28);
+  --aurora-c: oklch(0.78 0.12 270 / 0.25);
+  --glass-hi: oklch(1 0 0 / 0.65);
+}
+
+.dark {
+  --surface: oklch(0.14 0.03 268);
+  --surface-2: oklch(0.2 0.035 268 / 0.62);
+  --surface-3: oklch(0.26 0.04 268 / 0.8);
+  --ink: oklch(0.96 0.008 250);
+  --ink-soft: oklch(0.76 0.02 255);
+  --line: oklch(1 0 0 / 0.09);
+  --line-strong: oklch(1 0 0 / 0.2);
+  --ring-c: 0.8 0.15 165;
+  --aurora-a: oklch(0.6 0.15 165 / 0.28);
+  --aurora-b: oklch(0.65 0.14 80 / 0.16);
+  --aurora-c: oklch(0.5 0.18 280 / 0.3);
+  --glass-hi: oklch(1 0 0 / 0.07);
+}
+
+@theme inline {
+  --color-background: var(--surface);
+  --color-foreground: var(--ink);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+}
+
+@theme {
+  /* Fonts */
+  --font-sans: "Plus Jakarta Sans", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-hindi: "Noto Sans Devanagari", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand green (sap / palm leaf) */
+  --color-brand-50: oklch(0.976 0.02 145);
+  --color-brand-100: oklch(0.952 0.04 148);
+  --color-brand-200: oklch(0.902 0.07 150);
+  --color-brand-300: oklch(0.826 0.1 151);
+  --color-brand-400: oklch(0.712 0.11 152);
+  --color-brand-500: oklch(0.588 0.11 152);
+  --color-brand-600: oklch(0.488 0.09 152);
+  --color-brand-700: oklch(0.41 0.08 153);
+  --color-brand-800: oklch(0.333 0.06 153);
+  --color-brand-900: oklch(0.272 0.05 154);
+  --color-brand-950: oklch(0.176 0.04 155);
+
+  /* Gold (oil / harvest) */
+  --color-gold-50: oklch(0.982 0.02 85);
+  --color-gold-100: oklch(0.961 0.05 88);
+  --color-gold-200: oklch(0.918 0.09 84);
+  --color-gold-300: oklch(0.852 0.12 82);
+  --color-gold-400: oklch(0.775 0.14 80);
+  --color-gold-500: oklch(0.686 0.15 78);
+  --color-gold-600: oklch(0.604 0.13 76);
+  --color-gold-700: oklch(0.522 0.12 75);
+  --color-gold-800: oklch(0.445 0.1 74);
+  --color-gold-900: oklch(0.376 0.08 73);
+
+  /* Crimson (brand red) */
+  --color-crimson-50: oklch(0.974 0.02 20);
+  --color-crimson-100: oklch(0.95 0.04 22);
+  --color-crimson-200: oklch(0.905 0.08 24);
+  --color-crimson-300: oklch(0.84 0.11 24);
+  --color-crimson-400: oklch(0.76 0.14 25);
+  --color-crimson-500: oklch(0.64 0.17 26);
+  --color-crimson-600: oklch(0.548 0.16 26);
+  --color-crimson-700: oklch(0.466 0.14 27);
+  --color-crimson-800: oklch(0.392 0.12 28);
+  --color-crimson-900: oklch(0.328 0.09 28);
+
+  /* Clay (terracotta / below-target margin) */
+  --color-clay-50: oklch(0.978 0.02 50);
+  --color-clay-100: oklch(0.955 0.045 50);
+  --color-clay-200: oklch(0.905 0.08 48);
+  --color-clay-300: oklch(0.83 0.11 46);
+  --color-clay-400: oklch(0.74 0.14 44);
+  --color-clay-500: oklch(0.64 0.16 42);
+  --color-clay-600: oklch(0.55 0.15 40);
+  --color-clay-700: oklch(0.46 0.13 40);
+  --color-clay-800: oklch(0.39 0.11 40);
+  --color-clay-900: oklch(0.33 0.09 40);
+
+  /* Radius */
+  --radius-card: 1.25rem;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-soft: 0 1px 0 var(--glass-hi) inset, 0 10px 30px -14px rgb(10 20 60 / 0.25);
+  --shadow-card: 0 1px 0 var(--glass-hi) inset, 0 28px 50px -20px rgb(10 20 60 / 0.45);
+  --shadow-glow: 0 0 0 3px oklch(var(--ring-c) / 0.35), 0 12px 36px -10px oklch(var(--ring-c) / 0.5);
+  --drop-shadow-card: 0 12px 24px -12px rgb(0 0 0 / 0.35);
+
+  /* Animations */
+  --animate-shimmer: shimmer 2.2s linear infinite;
+  --animate-pulse-soft: pulse-soft 3s ease-in-out infinite;
+  --animate-oil-fill: oil-fill 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  --animate-float-seed: float-seed linear infinite;
+  --animate-sunrise-rise: sunrise-rise 6s ease-in-out infinite;
+  --animate-sunrise-glow: sunrise-glow 5s ease-in-out infinite;
+  --animate-field-sway: field-sway 7s ease-in-out infinite;
+  --animate-badge-bump: badge-bump 0.35s ease-out;
+  --animate-aurora: aurora-drift 22s ease-in-out infinite alternate;
+  --animate-aurora-slow: aurora-drift 32s ease-in-out infinite alternate-reverse;
+  --animate-float-3d: float-3d 7s ease-in-out infinite;
+  --animate-sheen: sheen 3.6s ease-in-out infinite;
+  --animate-rise-in: rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes aurora-drift {
+    0% { transform: translate3d(-6%, -4%, 0) scale(1); }
+    100% { transform: translate3d(8%, 6%, 0) scale(1.18); }
+  }
+
+  @keyframes float-3d {
+    0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
+    50% { transform: translateY(-8px) rotateX(4deg) rotateY(-5deg); }
+  }
+
+  @keyframes sheen {
+    0% { transform: translateX(-130%) skewX(-18deg); }
+    60%, 100% { transform: translateX(260%) skewX(-18deg); }
+  }
+
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(18px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes oil-fill {
+    0% {
+      transform: scaleY(0);
+      transform-origin: bottom;
+      opacity: 0;
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      transform: scaleY(1);
+      transform-origin: bottom;
+      opacity: 1;
+    }
+  }
+
+  /* Sunrise illustration: the sun lifts and the glow breathes. */
+  @keyframes sunrise-rise {
+    0%,
+    100% {
+      transform: translateY(6px);
+    }
+    50% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes sunrise-glow {
+    0%,
+    100% {
+      opacity: 0.35;
+      transform: scale(0.94);
+    }
+    50% {
+      opacity: 0.75;
+      transform: scale(1.06);
+    }
+  }
+
+  /* Mustard field: rows sway out of phase, so the field never moves as one block. */
+  @keyframes field-sway {
+    0%,
+    100% {
+      transform: skewX(0deg);
+    }
+    50% {
+      transform: skewX(1.6deg);
+    }
+  }
+
+  @keyframes float-seed {
+    0% {
+      transform: translateY(0) rotate(0deg) translateX(0);
+    }
+    25% {
+      transform: translateY(-12px) rotate(5deg) translateX(8px);
+    }
+    50% {
+      transform: translateY(-4px) rotate(-5deg) translateX(-8px);
+    }
+    75% {
+      transform: translateY(-16px) rotate(3deg) translateX(4px);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg) translateX(0);
+    }
+  }
+
+  /* The bell's unread-count pill gives a small bump when the number changes. */
+  @keyframes badge-bump {
+    0% {
+      transform: scale(0.6);
+    }
+    60% {
+      transform: scale(1.25);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+}
+
+/* Grain texture overlay */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.dark body::after {
+  opacity: 0.06;
+  mix-blend-mode: screen;
+}
+
+/* Base */
+html {
+  scroll-behavior: smooth;
+}
+
+*,
+::before,
+::after {
+  border-color: var(--line);
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+::selection {
+  background-color: oklch(var(--ring-c) / 0.35);
+}
+
+/* Focus rings */
+:focus-visible {
+  outline: 2px solid oklch(var(--ring-c) / 0.85);
+  outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid oklch(var(--ring-c) / 0.85);
+  outline-offset: 2px;
+}
+
+/* Shimmer surface - pairs with animate-shimmer */
+.shimmer-surface {
+  background: linear-gradient(
+    100deg,
+    var(--surface-2) 40%,
+    var(--surface-3) 50%,
+    var(--surface-2) 60%
+  );
+  background-size: 200% 100%;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ---------- Premium surface kit ---------- */
+body {
+  min-height: 100vh;
+}
+
+/* Frosted glass panel: use on any floating surface. */
+.glass {
+  background: var(--surface-2);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--color-brand-400), var(--color-gold-400) 55%, var(--color-brand-300));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-brand {
+  background: linear-gradient(135deg, var(--color-brand-500), var(--color-brand-700));
+}
+
+.gradient-gold {
+  background: linear-gradient(135deg, var(--color-gold-400), var(--color-gold-600));
+}
+
+/* Animated hairline border that lights up on hover */
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, oklch(var(--ring-c) / 0.7), transparent 40%, var(--color-gold-400));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+.glow-border:hover::before {
+  opacity: 1;
+}
+
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+/* Thin premium scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}

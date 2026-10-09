@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: ghana-dashboard-api
+  profiles:
+    active: dev
+  jackson:
+    time-zone: Asia/Kolkata
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force-request: true
+      # Stays false on purpose: a forced response charset ends up in the Content-Type
+      # header, so bills would download as application/pdf;charset=UTF-8. The response
+      # side is Utf8EncodingFilter's job and only applies to character payloads.
+      force-response: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Kolkata
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha

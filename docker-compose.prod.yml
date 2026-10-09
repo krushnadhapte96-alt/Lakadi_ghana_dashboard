@@ -1,0 +1,52 @@
+# Production stack for a VPS. Development stays local: the API runs from IntelliJ/VS Code and
+# the web app from `npm run dev`. This file is for the later VPS deployment.
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ghana_dashboard
+      MYSQL_USER: ghana_app
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./ghana-dashboard-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:mysql://mysql:3306/ghana_dashboard?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8
+      DB_USER: ghana_app
+      DB_PASS: ${DB_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 7d
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      UPLOAD_DIR: /data/uploads
+      MAX_FILE_SIZE_MB: 10
+      AES_KEY: ${AES_KEY}
+    volumes:
+      - uploads:/data/uploads
+
+  web:
+    build: ./ghana-dashboard-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+
+volumes:
+  mysql-data:
+  uploads:
+

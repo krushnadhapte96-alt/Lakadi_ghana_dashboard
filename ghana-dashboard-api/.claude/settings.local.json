@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /c/Users/krush/IdeaProjects/ghana-dashboard && ls -la)",
+      "Bash(cd \"C:/Users/krush/IdeaProjects/ghana-dashboard\" && ls)",
+      "Bash(./mvnw -q -o compile)",
+      "Read(//c/Program Files/Java//**)",
+      "Read(//c/Program Files/**)",
+      "Bash(where java *)",
+      "Bash(java -version)",
+      "Bash(JAVA_HOME=\"/c/Program Files/Java/jdk-24\" ./mvnw -q -o compile)",
+      "Bash(python3 -c \"import json; e=json.load\\(open\\('src/i18n/en.json'\\)\\); h=json.load\\(open\\('src/i18n/hi.json'\\)\\); print\\(len\\(e\\), len\\(h\\)\\)\")",
+      "Bash(node -e \"const e=require\\('./src/i18n/en.json'\\); const h=require\\('./src/i18n/hi.json'\\); console.log\\(Object.keys\\(e\\).length, Object.keys\\(h\\).length\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="gd-bg" x1="8" y1="6" x2="54" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2e7d32" />
+      <stop offset="0.55" stop-color="#1b5e20" />
+      <stop offset="1" stop-color="#0d3310" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#gd-bg)" />
+  <path
+    d="M32 10c8 11 15 20 15 29a15 15 0 1 1-30 0c0-9 7-18 15-29Z"
+    fill="#fbbf24"
+  />
+  <path
+    d="M20 39a12 12 0 0 0 5 10"
+    stroke="#fff8e1"
+    stroke-width="3"
+    stroke-linecap="round"
+    fill="none"
+  />
+  <ellipse cx="25.5" cy="32" rx="3" ry="4.5" fill="#fff" opacity=".75" transform="rotate(-28 25.5 32)" />
+</svg>

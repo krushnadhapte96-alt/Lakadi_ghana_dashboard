@@ -1,0 +1,188 @@
+-- V4: Sales, Orders and Customers
+
+-- Customers table
+CREATE TABLE customers (
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    shop_id     BIGINT       NOT NULL,
+    name        VARCHAR(150) NOT NULL,
+    phone       VARCHAR(20)  NOT NULL,
+    email       VARCHAR(100) NULL,
+    gst_no      VARCHAR(50)  NULL,
+    active      TINYINT(1)   NOT NULL DEFAULT 1,
+    created_at  DATETIME(6)  NOT NULL,
+    updated_at  DATETIME(6)  NOT NULL,
+    version     BIGINT       NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_customer_phone (shop_id, phone),
+    KEY idx_customer_shop (shop_id),
+    KEY idx_customer_active (active),
+    CONSTRAINT fk_customers_shops FOREIGN KEY (shop_id) REFERENCES shops (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Customer addresses table
+CREATE TABLE customer_addresses (
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    customer_id BIGINT       NOT NULL,
+    shop_id     BIGINT       NOT NULL,
+    address_type ENUM('HOME', 'WORK', 'OTHER') NOT NULL DEFAULT 'HOME',
+    address_line1 VARCHAR(200) NOT NULL,
+    address_line2 VARCHAR(200) NULL,
+    city        VARCHAR(50)  NOT NULL,
+    state       VARCHAR(50)  NOT NULL,
+    pincode     VARCHAR(10)  NOT NULL,
+    landmark    VARCHAR(100) NULL,
+    is_default  TINYINT(1)   NOT NULL DEFAULT 0,
+    active      TINYINT(1)   NOT NULL DEFAULT 1,
+    created_at  DATETIME(6)  NOT NULL,
+    updated_at  DATETIME(6)  NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_address_customer (customer_id),
+    KEY idx_address_shop (shop_id),
+    CONSTRAINT fk_addresses_customers FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE,
+    CONSTRAINT fk_addresses_shops FOREIGN KEY (shop_id) REFERENCES shops (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Sales table
+CREATE TABLE sales (
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    shop_id     BIGINT       NOT NULL,
+    bill_no     VARCHAR(50)  NOT NULL,
+    customer_id BIGINT       NULL,
+    user_id     BIGINT       NOT NULL,
+    subtotal    DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    discount    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    discount_type ENUM('PERCENT', 'AMOUNT') NOT NULL DEFAULT 'AMOUNT',
+    total_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    paid_amount  DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    payment_mode ENUM('CASH', 'UPI', 'CARD', 'UDHAAR') NOT NULL DEFAULT 'CASH',
+    payment_status ENUM('PAID', 'PARTIAL', 'UNPAID') NOT NULL DEFAULT 'PAID',
+    payment_reference VARCHAR(100) NULL,
+    notes       VARCHAR(500) NULL,
+    is_void     TINYINT(1)   NOT NULL DEFAULT 0,
+    void_reason VARCHAR(500) NULL,
+    voided_by   BIGINT       NULL,
+    voided_at   DATETIME(6)  NULL,
+    active      TINYINT(1)   NOT NULL DEFAULT 1,
+    created_at  DATETIME(6)  NOT NULL,
+    updated_at  DATETIME(6)  NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_sale_bill_no (shop_id, bill_no),
+    KEY idx_sale_shop (shop_id),
+    KEY idx_sale_customer (customer_id),
+    KEY idx_sale_user (user_id),
+    KEY idx_sale_created (created_at),
+    KEY idx_sale_payment_status (payment_status),
+    CONSTRAINT fk_sales_shops FOREIGN KEY (shop_id) REFERENCES shops (id),
+    CONSTRAINT fk_sales_customers FOREIGN KEY (customer_id) REFERENCES customers (id),
+    CONSTRAINT fk_sales_users FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_sales_voided_by FOREIGN KEY (voided_by) REFERENCES users (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Sale items table
+CREATE TABLE sale_items (
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    sale_id     BIGINT       NOT NULL,
+    shop_id     BIGINT       NOT NULL,
+    product_id  BIGINT       NOT NULL,
+    batch_id    VARCHAR(100) NULL,
+    sku         VARCHAR(50)  NOT NULL,
+    product_name VARCHAR(150) NOT NULL,
+    qty         DECIMAL(12,3) NOT NULL DEFAULT 1.000,
+    unit        VARCHAR(10)   NOT NULL,
+    rate        DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    amount      DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    cost_price  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    profit      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    created_at  DATETIME(6)  NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_sale_item_sale (sale_id),
+    KEY idx_sale_item_product (product_id),
+    KEY idx_sale_item_shop (shop_id),
+    CONSTRAINT fk_sale_items_sales FOREIGN KEY (sale_id) REFERENCES sales (id) ON DELETE CASCADE,
+    CONSTRAINT fk_sale_items_products FOREIGN KEY (product_id) REFERENCES products (id),
+    CONSTRAINT fk_sale_items_shops FOREIGN KEY (shop_id) REFERENCES shops (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Orders table
+CREATE TABLE orders (
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    shop_id     BIGINT       NOT NULL,
+    bill_no     VARCHAR(50)  NOT NULL,
+    customer_id BIGINT       NOT NULL,
+    address_id  BIGINT       NOT NULL,
+    user_id     BIGINT       NOT NULL,
+    subtotal    DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    delivery_charge DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    discount    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    discount_type ENUM('PERCENT', 'AMOUNT') NOT NULL DEFAULT 'AMOUNT',
+    total_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    paid_amount  DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    payment_mode ENUM('COD', 'UPI', 'CASH', 'UDHAAR') NOT NULL DEFAULT 'COD',
+    payment_status ENUM('PAID', 'PARTIAL', 'UNPAID') NOT NULL DEFAULT 'UNPAID',
+    payment_reference VARCHAR(100) NULL,
+    status      ENUM('NEW', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED') NOT NULL DEFAULT 'NEW',
+    expected_delivery_date DATE NULL,
+    actual_delivery_date DATE NULL,
+    notes       VARCHAR(500) NULL,
+    cancel_reason VARCHAR(500) NULL,
+    cancelled_by BIGINT NULL,
+    cancelled_at DATETIME(6) NULL,
+    active      TINYINT(1)   NOT NULL DEFAULT 1,
+    created_at  DATETIME(6)  NOT NULL,
+    updated_at  DATETIME(6)  NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_order_bill_no (shop_id, bill_no),
+    KEY idx_order_shop (shop_id),
+    KEY idx_order_customer (customer_id),
+    KEY idx_order_address (address_id),
+    KEY idx_order_user (user_id),
+    KEY idx_order_status (status),
+    KEY idx_order_created (created_at),
+    CONSTRAINT fk_orders_shops FOREIGN KEY (shop_id) REFERENCES shops (id),
+    CONSTRAINT fk_orders_customers FOREIGN KEY (customer_id) REFERENCES customers (id),
+    CONSTRAINT fk_orders_addresses FOREIGN KEY (address_id) REFERENCES customer_addresses (id),
+    CONSTRAINT fk_orders_users FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_orders_cancelled_by FOREIGN KEY (cancelled_by) REFERENCES users (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Order items table
+CREATE TABLE order_items (
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id    BIGINT       NOT NULL,
+    shop_id     BIGINT       NOT NULL,
+    product_id  BIGINT       NOT NULL,
+    sku         VARCHAR(50)  NOT NULL,
+    product_name VARCHAR(150) NOT NULL,
+    qty         DECIMAL(12,3) NOT NULL DEFAULT 1.000,
+    unit        VARCHAR(10)   NOT NULL,
+    rate        DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    amount      DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    cost_price  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    profit      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    created_at  DATETIME(6)  NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_order_item_order (order_id),
+    KEY idx_order_item_product (product_id),
+    KEY idx_order_item_shop (shop_id),
+    CONSTRAINT fk_order_items_orders FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
+    CONSTRAINT fk_order_items_products FOREIGN KEY (product_id) REFERENCES products (id),
+    CONSTRAINT fk_order_items_shops FOREIGN KEY (shop_id) REFERENCES shops (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Order status history table
+CREATE TABLE order_status_history (
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    order_id    BIGINT       NOT NULL,
+    shop_id     BIGINT       NOT NULL,
+    old_status  ENUM('NEW', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED') NULL,
+    new_status  ENUM('NEW', 'CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED') NOT NULL,
+    changed_by  BIGINT       NOT NULL,
+    notes       VARCHAR(500) NULL,
+    created_at  DATETIME(6)  NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_status_history_order (order_id),
+    KEY idx_status_history_shop (shop_id),
+    CONSTRAINT fk_status_history_orders FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
+    CONSTRAINT fk_status_history_shops FOREIGN KEY (shop_id) REFERENCES shops (id),
+    CONSTRAINT fk_status_history_users FOREIGN KEY (changed_by) REFERENCES users (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

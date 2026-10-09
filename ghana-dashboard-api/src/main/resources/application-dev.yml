@@ -1,0 +1,42 @@
+﻿spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/ghana_dashboard?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8&useUnicode=true
+    username: ghana_app
+    password: "Ghana@2026#Dev"
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    org.flywaydb: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: INFO
+
+app:
+  jwt:
+    secret: ghana-dashboard-dev-secret-0123456789abcdef
+    access-ttl: 15m
+    refresh-ttl: 7d
+  cors:
+    origins:
+      - http://localhost:5173
+  storage:
+    upload-dir: ./uploads
+    max-file-size-mb: 10
+  crypto:
+    aes-key: ghana-dev-aes-key-2026
+  mail:
+    # Flip to true and fill in spring.mail.* below to deliver licence reminders
+    # by email instead of the log.
+    enabled: false
+    from: no-reply@ghana-dashboard.local
+
+# spring:
+#   mail:
+#     host: smtp.example.com
+#     port: 587
+#     username: ""
+#     password: ""
+#     properties:
+#       mail.smtp.auth: true
+#       mail.smtp.starttls.enable: true

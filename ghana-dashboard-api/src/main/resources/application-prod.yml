@@ -1,0 +1,20 @@
+﻿spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/ghana_dashboard?useSSL=true&characterEncoding=UTF-8&serverTimezone=Asia/Kolkata}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+  flyway:
+    validate-on-migrate: ${FLYWAY_VALIDATE:true}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-ttl: ${JWT_ACCESS_TTL:15m}
+    refresh-ttl: ${JWT_REFRESH_TTL:7d}
+  cors:
+    origins: ${CORS_ORIGINS:https://app.ghanadashboard.example}
+  storage:
+    upload-dir: ${UPLOAD_DIR:/data/ghana/uploads}
+    max-file-size-mb: ${MAX_FILE_SIZE_MB:10}
+  crypto:
+    aes-key: ${AES_KEY}
