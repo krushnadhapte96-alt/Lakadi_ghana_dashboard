@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { fetchMyAccount } from '@/api/settings'
 import { SaveBar, Section } from '@/components/settings/Section'
 import { useSyncedForm } from '@/components/settings/useSyncedForm'
 import { useSettingsMutations } from '@/components/settings/useSettingsMutations'
-import { Badge, ErrorState, Select, Skeleton } from '@/components/ui'
+import { Badge, Button, ErrorState, Select, Skeleton } from '@/components/ui'
 import { useLanguage } from '@/i18n'
 import type { Language } from '@/i18n'
+import { Icon } from '@/utils/icons'
 
 /**
  * Self-service profile. Deliberately cannot change name, phone, email or role - the
@@ -14,6 +16,7 @@ import type { Language } from '@/i18n'
  */
 export function MyAccountTab() {
   const { t, language, setLanguage } = useLanguage()
+  const navigate = useNavigate()
   const account = useQuery({ queryKey: ['settings', 'my-account'], queryFn: fetchMyAccount })
   const { saveAccount } = useSettingsMutations()
   const stored = account.data?.preferredLanguage ?? language
@@ -80,6 +83,7 @@ export function MyAccountTab() {
           options={[
             { value: 'en', label: 'English' },
             { value: 'hi', label: '\u0939\u093f\u0902\u0926\u0940 (Hindi)' },
+            { value: 'mr', label: '\u092e\u0930\u093e\u0920\u0940 (Marathi)' },
           ]}
         />
         <SaveBar
@@ -100,12 +104,10 @@ export function MyAccountTab() {
         title={t('settings.account.passwordTitle')}
         description={t('settings.account.passwordDescription')}
       >
-        <a
-          href="/change-password"
-          className="inline-flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-700"
-        >
+        <Button variant="secondary" onClick={() => navigate('/change-password')}>
+          <Icon name="password" className="size-4" />
           {t('settings.account.changePassword')}
-        </a>
+        </Button>
       </Section>
     </div>
   )

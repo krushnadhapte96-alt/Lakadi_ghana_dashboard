@@ -70,7 +70,7 @@ export function DropdownMenu({
       {open && (
         <div
           className={cn(
-            'absolute z-50 mt-1 min-w-48 rounded-card border border-line bg-surface-2 shadow-card p-1',
+            'absolute z-50 mt-1 min-w-48 rounded-card border border-line bg-surface-2 shadow-card p-1 backdrop-blur-xl',
             positionClasses[position],
           )}
           role="menu"

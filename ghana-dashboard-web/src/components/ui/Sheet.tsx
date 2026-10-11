@@ -75,7 +75,7 @@ export function Sheet({
             exit={offscreen}
             transition={{ type: 'spring', damping: 32, stiffness: 320 }}
             className={cn(
-              'absolute inset-x-0 bottom-0 flex max-h-[92vh] flex-col overflow-hidden rounded-t-card bg-surface-2 shadow-2xl outline-none',
+              'absolute inset-x-0 bottom-0 flex max-h-[92vh] flex-col overflow-hidden rounded-t-card bg-surface-2 shadow-2xl backdrop-blur-xl outline-none',
               'sm:inset-y-0 sm:left-auto sm:right-0 sm:max-h-none sm:w-[32rem] sm:rounded-none',
               className,
             )}

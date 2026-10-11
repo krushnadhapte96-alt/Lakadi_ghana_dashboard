@@ -17,10 +17,13 @@ function FullScreenLoader() {
 
 /** Boots the session (refresh cookie -> access token) once on app load. */
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { clearSession } = useAuthStore()
   useEffect(() => {
-    // refreshSession() already sets/clears the store on success/failure.
+    // Clear any existing session so the login page always shows first
+    clearSession()
+    // Then boot a fresh session (will redirect to login if no credentials)
     void bootstrapSession()
-  }, [])
+  }, [clearSession])
 
   return <>{children}</>
 }

@@ -1,4 +1,6 @@
 import { useLanguage, type Language } from '@/i18n'
+import { getAccessToken } from '@/stores/auth'
+import { updateMyAccount } from '@/api/settings'
 import { cn } from '@/utils/cn'
 
 const options: { value: Language; label: string }[] = [
@@ -21,7 +23,10 @@ export function LanguageToggle() {
           key={option.value}
           type="button"
           aria-pressed={language === option.value}
-          onClick={() => setLanguage(option.value)}
+          onClick={() => {
+            setLanguage(option.value)
+            if (getAccessToken()) void updateMyAccount(option.value).catch(() => undefined)
+          }}
           className={cn(
             'focus-ring rounded-pill px-3 py-1 text-xs font-semibold transition-colors',
             language === option.value

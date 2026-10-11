@@ -156,10 +156,11 @@ export function CustomerFormDrawer({ open, onClose, customer }: CustomerFormDraw
         <Select
           label={t('customers.form.language')}
           value={form.preferredLanguage}
-          onChange={(value) => set('preferredLanguage', value === 'hi' ? 'hi' : 'en')}
+          onChange={(value) => set('preferredLanguage', value as 'en' | 'hi' | 'mr')}
           options={[
             { value: 'en', label: t('customers.form.language.en') },
             { value: 'hi', label: t('customers.form.language.hi') },
+            { value: 'mr', label: t('customers.form.language.mr') },
           ]}
           hint={t('customers.form.languageHint')}
         />

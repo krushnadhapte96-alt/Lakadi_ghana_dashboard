@@ -2,7 +2,9 @@ package com.ghana.dashboard.service;
 
 import com.ghana.dashboard.common.DomainException;
 import com.ghana.dashboard.common.JdbcSupport;
+import com.ghana.dashboard.domain.ShopSettings;
 import com.ghana.dashboard.dto.SettingsDtos;
+import com.ghana.dashboard.repository.ShopSettingsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -36,6 +38,7 @@ public class SettingsService {
     private static final Logger log = LoggerFactory.getLogger(SettingsService.class);
 
     // app_settings keys. Grouped so the fallbacks below read as one block.
+    // Kept for backward compatibility fallback only.
     private static final String K_BILL_PREFIX = "billing.bill_prefix";
     private static final String K_FOOTER = "billing.footer_message";
     private static final String K_SHOW_BATCH = "billing.show_batch_number";
@@ -61,11 +64,14 @@ public class SettingsService {
     private final JdbcSupport db;
     private final FileStorageService storage;
     private final AesCryptoService crypto;
+    private final ShopSettingsRepository shopSettingsRepository;
 
-    public SettingsService(JdbcSupport db, FileStorageService storage, AesCryptoService crypto) {
+    public SettingsService(JdbcSupport db, FileStorageService storage, AesCryptoService crypto,
+                           ShopSettingsRepository shopSettingsRepository) {
         this.db = db;
         this.storage = storage;
         this.crypto = crypto;
+        this.shopSettingsRepository = shopSettingsRepository;
     }
 
     // ==================== shop profile ====================
@@ -158,81 +164,87 @@ public class SettingsService {
         return storage.read(row.logoPath, row.logoName, row.logoType);
     }
 
-    // ==================== billing ====================
+// ==================== billing ====================
 
     @Transactional(readOnly = true)
     public SettingsDtos.BillingSettingsResponse billing(Long shopId) {
+        ShopSettings ss = getOrCreateShopSettings(shopId);
         return new SettingsDtos.BillingSettingsResponse(
-                text(shopId, K_BILL_PREFIX, "S"),
-                text(shopId, K_FOOTER, ""),
-                flag(shopId, K_SHOW_BATCH, false),
-                flag(shopId, K_SHOW_QR, true),
-                flag(shopId, K_SHOW_BANK, false));
+                ss.getBillPrefix(),
+                ss.getFooterMessage() == null ? "" : ss.getFooterMessage(),
+                ss.getShowBatchNumber(),
+                ss.getShowUpiQr(),
+                ss.getShowBankDetails());
     }
 
     @Transactional
     public SettingsDtos.BillingSettingsResponse updateBilling(Long shopId, Long userId,
-                                                             SettingsDtos.BillingSettingsRequest request) {
+                                                              SettingsDtos.BillingSettingsRequest request) {
         String prefix = request.billPrefix().trim().toUpperCase();
         if (prefix.isEmpty()) {
             throw new DomainException(400, "Bill prefix cannot be empty");
         }
-        putAll(shopId, userId, Map.of(
-                K_BILL_PREFIX, prefix,
-                K_FOOTER, orEmpty(request.footerMessage()),
-                K_SHOW_BATCH, flagValue(request.showBatchNumber()),
-                K_SHOW_QR, flagValue(request.showUpiQr()),
-                K_SHOW_BANK, flagValue(request.showBankDetails())));
+        ShopSettings ss = getOrCreateShopSettings(shopId);
+        ss.setBillPrefix(prefix);
+        ss.setFooterMessage(orEmpty(request.footerMessage()));
+        ss.setShowBatchNumber(request.showBatchNumber());
+        ss.setShowUpiQr(request.showUpiQr());
+        ss.setShowBankDetails(request.showBankDetails());
+        shopSettingsRepository.save(ss);
         return billing(shopId);
     }
 
-    // ==================== defaults ====================
+// ==================== defaults ====================
 
     @Transactional(readOnly = true)
     public SettingsDtos.DefaultsResponse defaults(Long shopId) {
+        ShopSettings ss = getOrCreateShopSettings(shopId);
         return new SettingsDtos.DefaultsResponse(
-                decimal(shopId, K_LOW_STOCK, "0"),
-                integer(shopId, K_BEST_BEFORE, 365),
-                flag(shopId, K_CREDIT_ALLOWED, true),
-                integer(shopId, K_CREDIT_DAYS, 30),
-                decimal(shopId, K_CREDIT_LIMIT, "0"));
+                ss.getLowStockThreshold(),
+                ss.getBestBeforeDays(),
+                ss.getCreditSalesAllowed(),
+                ss.getCreditPeriodDays(),
+                ss.getCreditLimit());
     }
 
     @Transactional
     public SettingsDtos.DefaultsResponse updateDefaults(Long shopId, Long userId,
-                                                       SettingsDtos.DefaultsRequest request) {
-        putAll(shopId, userId, Map.of(
-                K_LOW_STOCK, request.defaultLowStockThreshold().toPlainString(),
-                K_BEST_BEFORE, String.valueOf(request.defaultBestBeforeDays()),
-                K_CREDIT_ALLOWED, flagValue(request.creditSalesAllowed()),
-                K_CREDIT_DAYS, String.valueOf(request.defaultCreditPeriodDays()),
-                K_CREDIT_LIMIT, request.defaultCreditLimit().toPlainString()));
+                                                        SettingsDtos.DefaultsRequest request) {
+        ShopSettings ss = getOrCreateShopSettings(shopId);
+        ss.setLowStockThreshold(request.defaultLowStockThreshold());
+        ss.setBestBeforeDays(request.defaultBestBeforeDays());
+        ss.setCreditSalesAllowed(request.creditSalesAllowed());
+        ss.setCreditPeriodDays(request.defaultCreditPeriodDays());
+        ss.setCreditLimit(request.defaultCreditLimit());
+        shopSettingsRepository.save(ss);
         return defaults(shopId);
     }
 
-    // ==================== notifications ====================
+// ==================== notifications ====================
 
     @Transactional(readOnly = true)
     public SettingsDtos.NotificationsResponse notifications(Long shopId) {
+        ShopSettings ss = getOrCreateShopSettings(shopId);
         return new SettingsDtos.NotificationsResponse(
-                text(shopId, K_ALERT_EMAIL, ""),
-                flag(shopId, K_LOW_STOCK_ALERTS, true),
-                flag(shopId, K_EXPIRY_ALERTS, true),
-                flag(shopId, K_LICENCE_ALERTS, true),
-                flag(shopId, K_PAYMENT_ALERTS, false),
-                flag(shopId, K_DAILY_DIGEST, false));
+                ss.getAlertEmail() == null ? "" : ss.getAlertEmail(),
+                ss.getLowStockAlerts(),
+                ss.getExpiryAlerts(),
+                ss.getLicenceReminders(),
+                ss.getPaymentReminders(),
+                ss.getDailyDigest());
     }
 
     @Transactional
     public SettingsDtos.NotificationsResponse updateNotifications(Long shopId, Long userId,
-                                                                  SettingsDtos.NotificationsRequest request) {
-        putAll(shopId, userId, Map.of(
-                K_ALERT_EMAIL, orEmpty(request.alertEmail()),
-                K_LOW_STOCK_ALERTS, flagValue(request.lowStockAlerts()),
-                K_EXPIRY_ALERTS, flagValue(request.expiryAlerts()),
-                K_LICENCE_ALERTS, flagValue(request.licenceReminders()),
-                K_PAYMENT_ALERTS, flagValue(request.paymentReminders()),
-                K_DAILY_DIGEST, flagValue(request.dailyDigest())));
+                                                                   SettingsDtos.NotificationsRequest request) {
+        ShopSettings ss = getOrCreateShopSettings(shopId);
+        ss.setAlertEmail(orEmpty(request.alertEmail()));
+        ss.setLowStockAlerts(request.lowStockAlerts());
+        ss.setExpiryAlerts(request.expiryAlerts());
+        ss.setLicenceReminders(request.licenceReminders());
+        ss.setPaymentReminders(request.paymentReminders());
+        ss.setDailyDigest(request.dailyDigest());
+        shopSettingsRepository.save(ss);
         return notifications(shopId);
     }
 
@@ -287,6 +299,7 @@ public class SettingsService {
     @Transactional(readOnly = true)
     public BillBranding billBranding(Long shopId) {
         ShopRow row = loadShop(shopId);
+        ShopSettings ss = getOrCreateShopSettings(shopId);
         try {
             byte[] logo = readLogoBytes(row.logoPath);
             String bank = null;
@@ -297,9 +310,10 @@ public class SettingsService {
                     log.warn("Bank details unreadable for shop {}; printing without them", shopId);
                 }
             }
-            return new BillBranding(row.name, logo, row.upiId, text(shopId, K_FOOTER, ""),
-                    flag(shopId, K_SHOW_BATCH, false), flag(shopId, K_SHOW_QR, true),
-                    flag(shopId, K_SHOW_BANK, false), bank, text(shopId, K_BILL_PREFIX, "S"));
+            return new BillBranding(row.name, logo, row.upiId,
+                    ss.getFooterMessage() == null ? "" : ss.getFooterMessage(),
+                    ss.getShowBatchNumber(), ss.getShowUpiQr(), ss.getShowBankDetails(),
+                    bank, ss.getBillPrefix());
         } catch (RuntimeException e) {
             log.warn("Falling back to unbranded bills for shop {}", shopId, e);
             return new BillBranding(row.name, null, null, "", false, false, false, null, "S");
@@ -403,6 +417,11 @@ public class SettingsService {
                 rs.getString("logo_type"), rs.getString("bank_details_enc"), rs.getString("currency_code")))
                 .stream().findFirst()
                 .orElseThrow(() -> new DomainException(404, "Shop not found"));
+    }
+
+    /** Ensures a ShopSettings row exists for the shop (seeded by V19). */
+    private ShopSettings getOrCreateShopSettings(Long shopId) {
+        return shopSettingsRepository.findByShopId(shopId);
     }
 
     /**

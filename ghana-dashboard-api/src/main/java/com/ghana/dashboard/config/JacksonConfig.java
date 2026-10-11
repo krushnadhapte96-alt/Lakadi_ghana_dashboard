@@ -1,14 +1,15 @@
 package com.ghana.dashboard.config;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.util.AccessPattern;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -24,11 +25,12 @@ import java.time.format.DateTimeParseException;
 public class JacksonConfig {
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jsr310Customizer() {
-        return builder -> builder.deserializers(new LenientLocalDateTimeDeserializer());
+    public JsonMapperBuilderCustomizer jsr310Customizer() {
+        return builder -> builder.addModule(
+                new SimpleModule().addDeserializer(LocalDateTime.class, new LenientLocalDateTimeDeserializer()));
     }
 
-    public static class LenientLocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
+    public static class LenientLocalDateTimeDeserializer extends ValueDeserializer<LocalDateTime> {
 
         private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         private static final DateTimeFormatter LOCAL = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -36,7 +38,7 @@ public class JacksonConfig {
         private static final DateTimeFormatter SPACE = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         @Override
-        public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
             String text = p.getText();
             if (text == null || text.isBlank()) {
                 return null;
@@ -61,8 +63,18 @@ public class JacksonConfig {
             try {
                 return LocalDate.parse(value, DATE).atStartOfDay();
             } catch (DateTimeParseException e) {
-                throw new JsonMappingException(p, "Cannot parse '" + value + "' as a LocalDateTime", e);
+                throw new IllegalArgumentException("Cannot parse '" + value + "' as a LocalDateTime");
             }
+        }
+
+        @Override
+        public Object getNullValue(DeserializationContext ctxt) {
+            return null;
+        }
+
+        @Override
+        public AccessPattern getNullAccessPattern() {
+            return AccessPattern.DYNAMIC;
         }
     }
 }

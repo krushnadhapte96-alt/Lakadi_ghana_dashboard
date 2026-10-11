@@ -15,7 +15,7 @@ interface SectionProps {
 /** The standard settings block: a titled card with an optional action slot. */
 export function Section({ title, description, actions, note, children, className }: SectionProps) {
   return (
-    <Card className={cn('p-4 sm:p-5', className)}>
+    <Card tilt={false} className={cn('p-4 sm:p-5', className)}>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-base font-semibold text-ink">{title}</h2>
@@ -53,7 +53,7 @@ export function SaveBar({
   savingLabel,
 }: SaveBarProps) {
   return (
-    <div className="sticky bottom-0 -mx-4 mt-4 flex items-center justify-end gap-3 border-t border-line bg-surface-2/95 px-4 py-3 backdrop-blur sm:-mx-5 sm:px-5">
+    <div className="mt-5 flex flex-wrap items-center justify-end gap-3 border-t border-line pt-4">
       <Button variant="ghost" onClick={onReset} disabled={!dirty || saving}>
         {resetLabel}
       </Button>

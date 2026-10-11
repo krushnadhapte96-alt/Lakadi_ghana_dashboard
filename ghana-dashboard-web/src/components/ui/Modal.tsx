@@ -75,7 +75,7 @@ export function Modal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             className={cn(
-              'relative w-full rounded-card bg-surface-2 shadow-card',
+              'relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-card bg-surface-2 shadow-card backdrop-blur-xl',
               sizeClasses[size],
             )}
           >
@@ -94,7 +94,7 @@ export function Modal({
             )}
 
             {/* Content */}
-            <div className="p-6">{children}</div>
+            <div className="flex-1 overflow-y-auto p-6">{children}</div>
           </motion.div>
         </motion.div>
       )}

@@ -1,6 +1,8 @@
 import { api, normalizeError } from '@/api/axios'
 import type { ApiResponse, AuthUser, TokenResponse, UserSummary } from '@/api/types'
 import { useAuthStore } from '@/stores/auth'
+import { useLanguageStore } from '@/i18n/store'
+import { fetchMyAccount } from '@/api/settings'
 
 export interface RegisterShopInput {
   shopName: string
@@ -26,6 +28,14 @@ export async function login(
   })
   if (!data.success || !data.data?.accessToken) throw new Error(data.message)
   useAuthStore.getState().setSession(data.data.accessToken, data.data.user)
+
+  void fetchMyAccount()
+    .then((account) => {
+      const lang = account.preferredLanguage
+      if (lang === 'hi' || lang === 'mr') useLanguageStore.getState().setLanguage(lang)
+    })
+    .catch(() => undefined)
+
   return data.data
 }
 
